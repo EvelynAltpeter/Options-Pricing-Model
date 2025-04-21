@@ -49,7 +49,8 @@ def fetch_options_data(symbol, risk_free_rate, n_simulations):
     valid_options = options[options['time_to_expiry'] > 0].copy()
 
     if not valid_options.empty:
-        # Calculate prices
+        # Add debug prints
+        print("\nCalculating Black-Scholes prices...")
         valid_options['BS Price'] = valid_options.apply(
             lambda row: black_scholes(
                 S=row['current_stock_price'],
@@ -61,6 +62,7 @@ def fetch_options_data(symbol, risk_free_rate, n_simulations):
             ), axis=1
         )
 
+        print("Calculating Monte Carlo prices...")
         valid_options['MC Price'] = valid_options.apply(
             lambda row: monte_carlo_simulation(
                 current_stock_price=row['current_stock_price'],
@@ -73,6 +75,9 @@ def fetch_options_data(symbol, risk_free_rate, n_simulations):
             ), axis=1
         )
 
+        print("Sample calculated prices:")
+        print(valid_options[['strike', 'BS Price', 'MC Price']].head())
+
     return valid_options
 
 # Fetch data
@@ -80,36 +85,44 @@ options_data = fetch_options_data(symbol, risk_free_rate, n_simulations)
 
 # Display results
 if not options_data.empty:
+    # Verify calculations are happening
+    if 'BS Price' not in options_data.columns or 'MC Price' not in options_data.columns:
+        st.error("Price calculations failed - check terminal for errors")
+    else:
+        col1, col2 = st.columns(2)
 
-    col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Call Option")
+            calls = options_data[options_data['type'] == 'call'].sort_values('strike')
+            st.dataframe(calls.style.format({
+                'bid': '{:.2f}',
+                'ask': '{:.2f}',
+                'impliedVolatility': '{:.2%}',
+                'BS Price': '{:.2f}',
+                'MC Price': '{:.2f}',
+                'time_to_expiry': '{:.3f}'
+            }), height=400)
 
-    with col1:
-        st.subheader("Call Option")
-        calls = options_data[options_data['type'] == 'call'].sort_values('strike')
-        st.dataframe(calls.style.format({
-            'bid': '{:.2f}',
-            'ask': '{:.2f}',
-            'impliedVolatility': '{:.2%}',
-            'BS Price': '{:.2f}',
-            'MC Price': '{:.2f}',
-            'time_to_expiry': '{:.3f}'
-        }), height=400)
+        with col2:
+            st.subheader("Put Option")
+            puts = options_data[options_data['type'] == 'put'].sort_values('strike')
+            st.dataframe(puts.style.format({
+                'bid': '{:.2f}',
+                'ask': '{:.2f}',
+                'impliedVolatility': '{:.2%}',
+                'BS Price': '{:.2f}',
+                'MC Price': '{:.2f}',
+                'time_to_expiry': '{:.3f}'
+            }), height=400)
 
-    with col2:
-        st.subheader("Put Option")
-        puts = options_data[options_data['type'] == 'put'].sort_values('strike')
-        st.dataframe(puts.style.format({
-            'bid': '{:.2f}',
-            'ask': '{:.2f}',
-            'impliedVolatility': '{:.2%}',
-            'BS Price': '{:.2f}',
-            'MC Price': '{:.2f}',
-            'time_to_expiry': '{:.3f}'
-        }), height=400)
+        # Visualization
+        st.subheader("Pricing Comparison")
+        select_type = st.selectbox("Option Type", ['call', 'put'])
+        filtered = options_data[options_data['type'] == select_type]
 
-    # Visualization
-    st.subheader("Pricing Comparison")
-    select_type = st.selectbox("Option Type", ['call', 'put'])
-    filtered = options_data[options_data['type'] == select_type]
+        chart_data = filtered.set_index('strike')[['bid', 'ask', 'BS Price', 'MC Price']])
+        print("\nChart data sample:", chart_data.head())
+        st.line_chart(chart_data)
 
-    st.line_chart(filtered.set_index('strike')[['bid', 'ask', 'BS Price', 'MC Price']])
+else:
+    st.warning("No options data available for this symbol")
