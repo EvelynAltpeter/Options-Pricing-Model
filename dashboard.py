@@ -6,7 +6,7 @@ from datetime import datetime
 from monte_carlo import monte_carlo_simulation, n_simulations
 from black_scholes import black_scholes, risk_free_rate
 
-SYMBOL = "NVDA" #NVIDIA
+SYMBOL = "NVDA" # NVIDIA
 
 # Configure page
 st.set_page_config(layout="wide", page_title="Options Pricing Dashboard")
@@ -14,7 +14,7 @@ st.set_page_config(layout="wide", page_title="Options Pricing Dashboard")
 # Sidebar control
 st.sidebar.header("Parameters")
 symbol = st.sidebar.text_input("Ticker Symbol", SYMBOL)
-risk_free_rate = st.sidebar.slider("Risk-Free Rate (%)", 0.0, 2.5, 5.0, 10.0) / 100
+risk_free_rate = st.sidebar.slider("Risk-Free Rate (%)", 0.0, 5.0, 2.5) / 100
 n_simulations = st.sidebar.number_input("Monte Carlo Simulations", min_value=1000, value=100000, max_value=100000, step=1000)
 
 # Main dashboard
@@ -45,49 +45,38 @@ def fetch_options_data(symbol):
     options['current_stock_price'] = current_price
     options['time_to_expiry'] = (expiry_date - pd.Timestamp.now()).days / 365
 
-    # Select and rename columns
-    return options.rename(columns={'lastTradeDate': 'expiration'})[
-        ['strike',
-         'bid',
-         'ask',
-         'impliedVolatility',
-         'expiration',
-         'type',
-         'current_stock_price',
-         'time_to_expiry']]
-
-# Fetch data
-options_data = fetch_options_data(symbol)
-if not options_data.empty:
-    # First try to show non-expired options
-    valid_options = options_data[options_data['time_to_expiry'] > 0]
+    # Filter out expired options
+    valid_options = options[options['time_to_expiry'] > 0].copy()
 
     if not valid_options.empty:
-        print(f"\nShowing {len(valid_options)} ACTIVE options (time to expiry > 0):")
-        print(valid_options.head())
-        options_data['BS Price'] = options_data.apply(
+        # Calculate prices
+        valid_options['BS Price'] = valid_options.apply(
             lambda row: black_scholes(
                 S=row['current_stock_price'],
-                K=row['strike_price'],
+                K=row['strike'],
                 T=row['time_to_expiry'],
                 r=risk_free_rate,
                 sigma=row['impliedVolatility'],
-                option_type=row['type'],
+                option_type=row['type']
             ), axis=1
         )
 
-        options_data['MC Price'] = options_data.apply(
+        valid_options['MC Price'] = valid_options.apply(
             lambda row: monte_carlo_simulation(
                 current_stock_price=row['current_stock_price'],
-                strike_price=row['strike_price'],
+                strike_price=row['strike'],
                 risk_free_rate=risk_free_rate,
                 time_to_expiry=row['time_to_expiry'],
                 sigma=row['impliedVolatility'],
                 n_simulations=n_simulations,
-                option_type=row['type'],
+                option_type=row['type']
             ), axis=1
         )
 
+    return valid_options
+
+
+#
     # Display results
     col1, col2 = st.columns(2)
 
@@ -120,22 +109,4 @@ if not options_data.empty:
     select_type = st.selectbox("Option Type", ['call', 'put'])
     filtered = options_data[options_data['type'] == select_type]
 
-    st.line_chart(filtered.set_index('strike')[['bid', 'ask', 'BS Price', 'MC Price',]])
-
-'''
-
-    else:
-        # If no active options, show expired options
-        expired_options = options_data[options_data['time_to_expiry'] <= 0]
-        if not expired_options.empty:
-            print(f"\nNo active options available. Showing {len(expired_options)} EXPIRED options:")
-            print(expired_options.head())
-
-
-        else:
-            # If no options at all
-            print("\nNo options data available at all")
-else:
-    print("\nFailed to fetch any options data")
-
-'''
+    st.line_chart(filtered.set_index('strike')[['bid', 'ask', 'BS Price', 'MC Price']])
