@@ -14,14 +14,14 @@ st.set_page_config(layout="wide", page_title="Options Pricing Dashboard")
 # Sidebar control
 st.sidebar.header("Parameters")
 symbol = st.sidebar.text_input("Ticker Symbol", SYMBOL)
-risk_free_rate = st.sidebar.slider("Risk-Free Rate (%)", 0.0, 5.0, 2.5) / 100
-n_simulations = st.sidebar.number_input("Monte Carlo Simulations", min_value=1000, value=100000, max_value=100000, step=1000)
+risk_free_rate = st.sidebar.slider("Risk-Free Rate (%)", 0.0, 10.0, 2.5) / 100
+n_simulations = st.sidebar.number_input("Monte Carlo Simulations", min_value=1000, value=10000, max_value=100000, step=1000)
 
 # Main dashboard
 st.title(f"Options Pricing Dashboard - {symbol}")
 
 @st.cache_data(ttl=3600) # Cache for 1hr
-def fetch_options_data(symbol):
+def fetch_options_data(symbol, risk_free_rate, n_simulations):
 
     # Fetch current stock price
     ticker = yf.Ticker(symbol)
@@ -76,7 +76,7 @@ def fetch_options_data(symbol):
     return valid_options
 
 # Fetch data
-options_data = fetch_options_data(symbol)
+options_data = fetch_options_data(symbol, risk_free_rate, n_simulations)
 
 # Display results
 if not options_data.empty:
