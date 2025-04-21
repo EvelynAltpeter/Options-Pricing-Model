@@ -120,7 +120,7 @@ if not options_data.empty:
         select_type = st.selectbox("Option Type", ['call', 'put'])
         filtered = options_data[options_data['type'] == select_type]
 
-        chart_data = filtered.set_index('strike')[['bid', 'ask', 'BS Price', 'MC Price']])
+        chart_data = filtered.set_index('strike')[['bid', 'ask', 'BS Price', 'MC Price']]
         print("\nChart data sample:", chart_data.head())
         st.line_chart(chart_data)
 
