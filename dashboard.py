@@ -75,9 +75,12 @@ def fetch_options_data(symbol):
 
     return valid_options
 
+# Fetch data
+options_data = fetch_options_data(symbol)
 
-#
-    # Display results
+# Display results
+if not options_data.empty:
+
     col1, col2 = st.columns(2)
 
     with col1:
