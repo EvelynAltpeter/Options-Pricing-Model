@@ -13,6 +13,7 @@ def black_scholes(current_stock_price, strike_price, risk_free_rate, time_to_exp
 
     return price
 
+'''
 # Example case
 current_stock_price = 1000
 strike_price = 1010
@@ -23,7 +24,7 @@ sigma = 0.15          # Volatility of 15%
 call_price = black_scholes(current_stock_price, strike_price, risk_free_rate, time_to_expiry, sigma, 'call')
 put_price = black_scholes(current_stock_price, strike_price, risk_free_rate, time_to_expiry, sigma, 'put')
 print(f"Call Price: {call_price}, Put Price: {put_price}")
-
+'''
 
 
 

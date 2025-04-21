@@ -18,6 +18,7 @@ def monte_carlo_simulation(current_stock_price, strike_price, risk_free_rate, ti
     option_price = np.exp(-risk_free_rate * time_to_expiry) * np.mean(payoffs)
     return option_price
 
+'''
 # Example case
 current_stock_price = 1000
 strike_price = 1010
@@ -29,3 +30,4 @@ n_simulations = 10000
 mc_call_price = monte_carlo_simulation(current_stock_price, strike_price, risk_free_rate, time_to_expiry, sigma, n_simulations, 'call')
 mc_put_price = monte_carlo_simulation(current_stock_price, strike_price, risk_free_rate, time_to_expiry, sigma, n_simulations, 'put')
 print(f"Monte Carlo Call Price: {mc_call_price}, Monte Carlo Put Price: {mc_put_price}")
+'''
