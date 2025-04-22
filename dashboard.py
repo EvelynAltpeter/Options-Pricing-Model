@@ -150,5 +150,10 @@ if not options_data.empty:
         chart_data = filtered.set_index('strike')[['bid', 'ask', 'BS Price', 'MC Price']]
         st.line_chart(chart_data)
 
+        st.subheader("Implied Volatility Smile")
+        iv_data = options_data[options_data['type'] == select_type][['strike', 'impliedVolatility']]
+        st.line_chart(iv_data.set_index('strike'))
+
+
 else:
     st.warning("No options data available for this symbol")
