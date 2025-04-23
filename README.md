@@ -2,7 +2,7 @@
 
 Project purpose and motivation
 
-Theory behind B-S and MC models
+Theory behind Black Scholes (BS) and Monte Carlo (MC) models
 
 Technologies used (Streamlit, yfinance, NumPy)
 
