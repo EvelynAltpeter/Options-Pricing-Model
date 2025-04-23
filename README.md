@@ -1,5 +1,7 @@
 # Options-Pricing-Model
 
+How to run it: streamlit run dashboard.py
+
 Options Pricing Dashboard
 Project Purpose
 This dashboard provides a streamlined interface for analyzing options pricing using two fundamental quantitative models: the Black-Scholes analytical model and Monte Carlo simulations. The tool fetches real-time options chain data and computes theoretical prices, enabling traders and analysts to:
@@ -102,5 +104,3 @@ Technologies used (Streamlit, yfinance, NumPy)
 
 ![img.png](img.png)
 ![img_1.png](img_1.png)
-
-How to run it: streamlit run dashboard.py
